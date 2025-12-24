@@ -5,7 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cyber Mines Elite</title>
     <style>
-        /* --- CORE SETTINGS --- */
+        /* --- 1. ALIVE ANIMATIONS (Nayi Jaan) --- */
+        
+        /* Background ka hilna (Drift) */
+        @keyframes bg-drift {
+            0% { background-position: center top; transform: scale(1); }
+            50% { background-position: center bottom; transform: scale(1.05); }
+            100% { background-position: center top; transform: scale(1); }
+        }
+
+        /* Dabbo ka Saans Lena (Breathing Tiles) */
+        @keyframes tile-breath {
+            0% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); border-color: rgba(0, 255, 204, 0.5); }
+            100% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
+        }
+
+        /* Hacker Scanline (TV Effect) */
+        @keyframes scanline {
+            0% { top: -100%; }
+            100% { top: 200%; }
+        }
+
+        /* --- 2. CORE SETTINGS --- */
         body {
             margin: 0; padding: 0;
             background-color: #020205; 
@@ -24,6 +46,19 @@
             display: flex; flex-direction: column; justify-content: space-between;
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
             overflow: hidden;
+
+            /* Background Zinda ho gaya */
+            animation: bg-drift 20s infinite ease-in-out;
+        }
+
+        /* Scanline Overlay (Cyber Feel) */
+        .game-wrapper::after {
+            content: "";
+            position: absolute; left: 0; right: 0; height: 20%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 255, 204, 0.1), transparent);
+            pointer-events: none;
+            animation: scanline 5s linear infinite;
+            z-index: 5;
         }
 
         /* --- HEADER --- */
@@ -44,7 +79,7 @@
         .grid-container {
             flex-grow: 1;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 10px; position: relative;
+            padding: 10px; position: relative; z-index: 10;
         }
 
         .mines-grid {
@@ -71,7 +106,15 @@
             background-color: #1a1a1a;
             background-image: url('assets/tile_closed.png'); background-size: 100% 100%;
             border: 1px solid rgba(255,255,255,0.1);
+            
+            /* Tiles ab saans lenge */
+            animation: tile-breath 3s infinite ease-in-out;
         }
+        
+        /* Random delay taake sab ek sath na hilein */
+        .tile:nth-child(even) .front { animation-delay: 1s; }
+        .tile:nth-child(odd) .front { animation-delay: 0.5s; }
+
         .back {
             transform: rotateY(180deg); background-color: #081015;
             box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
@@ -85,14 +128,21 @@
         .tile.gem .back-icon { background-image: url('assets/tile_diamond.png'); filter: drop-shadow(0 0 8px #00ffcc); }
         .tile.bomb .back-icon { background-image: url('assets/tile_bomb.png'); filter: drop-shadow(0 0 8px #ff0044); }
 
-        /* --- NEW CONTROLS PANEL (FIXED) --- */
+        /* --- NEW CONTROLS PANEL (Image Background) --- */
         .controls-panel {
-            background: rgba(5, 5, 10, 0.95);
-            padding: 20px;
-            border-top: 1px solid #333;
+            /* Black color hata kar Image laga di */
+            background: url('assets/ui_controls_bg.png') no-repeat center bottom;
+            background-size: cover;
+            
+            /* Fallback agar image na ho */
+            background-color: #050510;
+            
+            padding: 20px 20px 30px 20px; /* Bottom padding thodi zyada taake mobile mein kate nahi */
+            border-top: 1px solid #00ffcc;
             display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             z-index: 20;
+            position: relative;
         }
 
         /* Row 1: Bet & Mines */
@@ -100,40 +150,31 @@
             display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
         }
 
-        /* 1. BET STEPPER (Fixed Alignment) */
+        /* 1. BET STEPPER */
         .stepper-container {
             display: flex; align-items: center; justify-content: space-between;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
-            /* Fallback if image missing */
             background-color: rgba(0,0,0,0.6); border: 1px solid #00ffcc; border-radius: 8px;
-            
-            padding: 0 5px;
-            height: 50px;
-            width: 100%;
+            padding: 0 5px; height: 50px; width: 100%;
         }
 
         .stepper-btn {
             width: 40px; height: 100%;
             background: url('assets/btn_arrow.png') no-repeat center/contain;
-            /* Remove Fallback color to avoid box glitch */
             background-color: transparent; 
-            
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             font-size: 24px; color: #00ffcc; user-select: none;
-            filter: drop-shadow(0 0 5px #00ffcc);
         }
         .stepper-btn:active { transform: scale(0.8); }
         .stepper-btn.left { transform: rotate(180deg); } 
-        .stepper-btn.left:active { transform: rotate(180deg) scale(0.8); }
 
         .stepper-display {
             flex-grow: 1; text-align: center;
             font-size: 22px; font-weight: 900; color: white;
-            text-shadow: 0 0 10px #00ffcc;
-            font-family: monospace;
+            text-shadow: 0 0 10px #00ffcc; font-family: monospace;
         }
 
-        /* 2. MINES SELECTOR (Fixed) */
+        /* 2. MINES SELECTOR */
         .mines-selector {
             height: 50px; width: 80px;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
@@ -147,23 +188,15 @@
         }
         .mines-select option { background: #000; }
         
-        .label-text { font-size: 12px; color: #aaa; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        .label-text { font-size: 12px; color: #fff; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; text-shadow: 0 0 5px black;}
 
-        /* 3. MAIN ACTION BUTTON (Glitch Removed) */
+        /* 3. MAIN ACTION BUTTON */
         .main-btn {
             width: 100%; height: 70px;
-            
-            /* Image Setting */
             background-image: url('assets/btn_action.png');
-            background-position: center;
-            background-size: contain; /* Fit perfectly */
-            background-repeat: no-repeat;
-            
-            /* CRITICAL FIX: Background color removed */
+            background-position: center; background-size: contain; background-repeat: no-repeat;
             background-color: transparent; 
-            border: none; outline: none; box-shadow: none;
-
-            cursor: pointer;
+            border: none; outline: none; box-shadow: none; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: transform 0.1s;
         }
@@ -172,15 +205,12 @@
         .btn-text-main { font-size: 26px; font-weight: 900; color: #000; text-transform: uppercase; line-height: 1; }
         .btn-text-sub { font-size: 12px; font-weight: bold; color: #222; margin-top: 2px; }
 
-        /* Fallback Design (Sirf tab dikhega agar image load na ho) */
         .main-btn.no-img {
             background: linear-gradient(180deg, #00ffcc, #00997a);
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,255,204,0.4);
+            border-radius: 10px; box-shadow: 0 0 20px rgba(0,255,204,0.4);
         }
 
-        /* Cashout Logic */
-        .btn-cashout { filter: hue-rotate(-40deg) brightness(1.2); } /* Golden effect */
+        .btn-cashout { filter: hue-rotate(-40deg) brightness(1.2); }
 
         /* --- OVERLAYS --- */
         .msg-overlay {
@@ -218,7 +248,6 @@
         <div class="controls-panel">
             
             <div class="control-row">
-                
                 <div style="flex: 3;">
                     <div class="label-text">Bet Amount</div>
                     <div class="stepper-container">
@@ -240,7 +269,6 @@
                         </select>
                     </div>
                 </div>
-
             </div>
 
             <button class="main-btn" id="actionBtn" onclick="handleAction()">
@@ -253,10 +281,9 @@
     </div>
 
     <script>
-        // --- PRESET BET VALUES ---
+        // --- JAVASCRIPT LOGIC (Same as before) ---
         const betValues = [20, 40, 60, 80, 100, 200, 500, 800, 1200, 3000, 8000];
-        let betIndex = 4; // Default to 100
-        
+        let betIndex = 4;
         let balance = 5000;
         let active = false;
         let mines = [];
@@ -264,7 +291,6 @@
         let multiplier = 1.0;
         const totalTiles = 25;
 
-        // Elements
         const grid = document.getElementById('grid');
         const balanceEl = document.getElementById('balance');
         const msgBox = document.getElementById('msgBox');
@@ -273,58 +299,44 @@
         const btnMainText = document.getElementById('btnMainText');
         const btnSubText = document.getElementById('btnSubText');
 
-        // 1. UPDATE BET DISPLAY
         function changeBet(direction) {
-            if(active) return; 
-            
+            if(active) return;
             betIndex += direction;
             if(betIndex < 0) betIndex = 0;
             if(betIndex >= betValues.length) betIndex = betValues.length - 1;
-
             betDisplay.innerText = betValues[betIndex];
         }
 
-        // 2. MAIN BUTTON HANDLER
         function handleAction() {
-            if(!active) {
-                startGame();
-            } else {
-                cashout();
-            }
+            if(!active) startGame();
+            else cashout();
         }
 
-        // 3. START GAME
         function startGame() {
             const currentBet = betValues[betIndex];
             const minesCount = parseInt(document.getElementById('minesCount').value);
 
             if(currentBet > balance) { alert("Insufficient Balance!"); return; }
 
-            // Logic Reset
             balance -= currentBet;
             updateBalance();
             active = true;
             revealed = 0;
             multiplier = 1.0;
             
-            // Generate Mines
             mines = [];
             while(mines.length < minesCount) {
                 let r = Math.floor(Math.random() * 25);
                 if(!mines.includes(r)) mines.push(r);
             }
 
-            // UI Reset
             createGrid();
             msgBox.classList.remove('show');
-            
-            // Button Visuals
             actionBtn.classList.add('btn-cashout');
             btnMainText.innerText = "CASHOUT";
             updateProfitUI(); 
         }
 
-        // 4. GRID LOGIC
         function createGrid() {
             grid.innerHTML = '';
             for(let i=0; i<totalTiles; i++) {
@@ -346,23 +358,19 @@
             const icon = tile.querySelector('.back-icon');
 
             if(mines.includes(index)) {
-                // LOSS
                 tile.classList.add('bomb');
                 if(getComputedStyle(icon).backgroundImage === 'none') icon.innerHTML = '💣';
                 gameOver(false, 0);
             } else {
-                // WIN
                 tile.classList.add('gem');
                 if(getComputedStyle(icon).backgroundImage === 'none') icon.innerHTML = '💎';
                 revealed++;
                 multiplier *= 1.15; 
                 updateProfitUI();
-
                 if(revealed === (totalTiles - mines.length)) cashout();
             }
         }
 
-        // 5. CASHOUT & UI
         function updateProfitUI() {
             const currentBet = betValues[betIndex];
             const currentWin = Math.floor(currentBet * multiplier);
@@ -387,20 +395,15 @@
 
         function gameOver(win, amount) {
             active = false;
-            
-            // Reveal Mines
             mines.forEach(idx => {
                 const t = grid.children[idx];
                 t.classList.add('revealed', 'bomb');
             });
-
-            // Message
             msgBox.classList.add('show');
             msgBox.style.borderColor = win ? '#00ffcc' : '#ff0044';
             document.getElementById('msgTitle').innerText = win ? "YOU WON!" : "BOOM!";
             document.getElementById('msgTitle').style.color = win ? '#00ffcc' : '#ff0044';
             document.getElementById('msgText').innerText = win ? `+${amount}` : "Try Again";
-
             updateProfitUI(); 
         }
 
@@ -408,12 +411,9 @@
             balanceEl.innerText = balance.toLocaleString();
         }
 
-        // Check if images are loading, if not apply fallback class
         const imgCheck = new Image();
         imgCheck.src = 'assets/btn_action.png';
-        imgCheck.onerror = function() {
-            document.getElementById('actionBtn').classList.add('no-img');
-        };
+        imgCheck.onerror = function() { document.getElementById('actionBtn').classList.add('no-img'); };
 
         createGrid();
     </script>
