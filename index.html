@@ -56,7 +56,7 @@
         /* --- TILE SYSTEM --- */
         .tile {
             aspect-ratio: 1/1; position: relative; cursor: pointer;
-            transform-style: preserve-3d; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d; transition: transform 0.3s;
         }
         .tile:active { transform: scale(0.90); }
         .tile.revealed { transform: rotateY(180deg); cursor: default; }
@@ -65,7 +65,6 @@
             position: absolute; width: 100%; height: 100%;
             backface-visibility: hidden; border-radius: 8px;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
         }
 
         .front {
@@ -86,93 +85,109 @@
         .tile.gem .back-icon { background-image: url('assets/tile_diamond.png'); filter: drop-shadow(0 0 8px #00ffcc); }
         .tile.bomb .back-icon { background-image: url('assets/tile_bomb.png'); filter: drop-shadow(0 0 8px #ff0044); }
 
-        /* --- NEW CONTROLS PANEL (High Graphics) --- */
+        /* --- NEW CONTROLS PANEL (FIXED) --- */
         .controls-panel {
-            background: rgba(10, 12, 16, 0.95);
-            padding: 15px;
-            border-top: 2px solid #00ffcc;
-            display: flex; flex-direction: column; gap: 10px;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+            background: rgba(5, 5, 10, 0.95);
+            padding: 20px;
+            border-top: 1px solid #333;
+            display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
             z-index: 20;
         }
 
-        /* 1. BET CONTROLS (Row 1) */
+        /* Row 1: Bet & Mines */
         .control-row {
-            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+            display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
         }
 
-        /* Custom Stepper (Minus/Display/Plus) */
+        /* 1. BET STEPPER (Fixed Alignment) */
         .stepper-container {
-            display: flex; align-items: center; gap: 5px;
+            display: flex; align-items: center; justify-content: space-between;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
-            /* Fallback CSS if image missing */
-            background-color: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid #333;
-            padding: 5px;
-            flex: 2;
+            /* Fallback if image missing */
+            background-color: rgba(0,0,0,0.6); border: 1px solid #00ffcc; border-radius: 8px;
+            
+            padding: 0 5px;
+            height: 50px;
+            width: 100%;
         }
 
         .stepper-btn {
-            width: 40px; height: 40px;
+            width: 40px; height: 100%;
             background: url('assets/btn_arrow.png') no-repeat center/contain;
-            /* Fallback */
-            background-color: #222; border: 1px solid #444; border-radius: 5px;
+            /* Remove Fallback color to avoid box glitch */
+            background-color: transparent; 
             
             cursor: pointer; display: flex; justify-content: center; align-items: center;
-            font-size: 20px; color: #00ffcc; user-select: none;
+            font-size: 24px; color: #00ffcc; user-select: none;
+            filter: drop-shadow(0 0 5px #00ffcc);
         }
-        .stepper-btn:active { transform: scale(0.9); filter: brightness(1.2); }
-        .stepper-btn.left { transform: rotate(180deg); } /* Arrow ko left ghumana */
+        .stepper-btn:active { transform: scale(0.8); }
+        .stepper-btn.left { transform: rotate(180deg); } 
+        .stepper-btn.left:active { transform: rotate(180deg) scale(0.8); }
 
         .stepper-display {
             flex-grow: 1; text-align: center;
-            font-size: 18px; font-weight: 900; color: white;
-            text-shadow: 0 0 5px #00ffcc;
+            font-size: 22px; font-weight: 900; color: white;
+            text-shadow: 0 0 10px #00ffcc;
+            font-family: monospace;
         }
-        .label-text { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 2px; text-align: center;}
 
-        /* Mines Selector */
+        /* 2. MINES SELECTOR (Fixed) */
         .mines-selector {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center;
+            height: 50px; width: 80px;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
-            background-color: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 10px;
-            padding: 5px; height: 50px; justify-content: center;
+            background-color: rgba(0,0,0,0.6); border: 1px solid #00ffcc; border-radius: 8px;
+            display: flex; justify-content: center; align-items: center;
         }
         .mines-select {
             background: transparent; border: none; color: white;
-            font-size: 16px; font-weight: bold; outline: none; text-align: center; width: 100%;
+            font-size: 20px; font-weight: bold; outline: none; text-align: center; width: 100%;
+            font-family: monospace;
         }
         .mines-select option { background: #000; }
-
-        /* 2. BIG ACTION BUTTON (Row 2) */
-        .main-btn {
-            width: 100%; height: 60px;
-            background: url('assets/btn_action.png') no-repeat center/100% 100%;
-            /* Fallback CSS */
-            background-color: #00ffcc;
-            border-radius: 10px;
-            
-            border: none; cursor: pointer;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: filter 0.2s;
-            position: relative;
-        }
-        .main-btn:active { transform: scale(0.98); }
         
-        /* Text inside button */
-        .btn-text-main { font-size: 24px; font-weight: 900; color: #000; text-transform: uppercase; }
-        .btn-text-sub { font-size: 12px; font-weight: bold; color: #333; }
+        .label-text { font-size: 12px; color: #aaa; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
 
-        /* Cashout Style (Yellow) */
-        .btn-cashout { filter: hue-rotate(-50deg); } /* Make it yellow/gold */
-        .btn-cashout .btn-text-main { color: #330000; }
+        /* 3. MAIN ACTION BUTTON (Glitch Removed) */
+        .main-btn {
+            width: 100%; height: 70px;
+            
+            /* Image Setting */
+            background-image: url('assets/btn_action.png');
+            background-position: center;
+            background-size: contain; /* Fit perfectly */
+            background-repeat: no-repeat;
+            
+            /* CRITICAL FIX: Background color removed */
+            background-color: transparent; 
+            border: none; outline: none; box-shadow: none;
+
+            cursor: pointer;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: transform 0.1s;
+        }
+        .main-btn:active { transform: scale(0.95); }
+        
+        .btn-text-main { font-size: 26px; font-weight: 900; color: #000; text-transform: uppercase; line-height: 1; }
+        .btn-text-sub { font-size: 12px; font-weight: bold; color: #222; margin-top: 2px; }
+
+        /* Fallback Design (Sirf tab dikhega agar image load na ho) */
+        .main-btn.no-img {
+            background: linear-gradient(180deg, #00ffcc, #00997a);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,255,204,0.4);
+        }
+
+        /* Cashout Logic */
+        .btn-cashout { filter: hue-rotate(-40deg) brightness(1.2); } /* Golden effect */
 
         /* --- OVERLAYS --- */
         .msg-overlay {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
             background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 2px solid;
-            text-align: center; z-index: 100; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            text-align: center; z-index: 100; transition: transform 0.3s;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 80%;
         }
         .msg-overlay.show { transform: translate(-50%, -50%) scale(1); }
         .msg-title { font-size: 32px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
@@ -204,13 +219,11 @@
             
             <div class="control-row">
                 
-                <div style="flex: 2;">
+                <div style="flex: 3;">
                     <div class="label-text">Bet Amount</div>
                     <div class="stepper-container">
                         <div class="stepper-btn left" onclick="changeBet(-1)">➜</div>
-                        
                         <div class="stepper-display" id="betDisplay">100</div>
-                        
                         <div class="stepper-btn" onclick="changeBet(1)">➜</div>
                     </div>
                 </div>
@@ -242,7 +255,7 @@
     <script>
         // --- PRESET BET VALUES ---
         const betValues = [20, 40, 60, 80, 100, 200, 500, 800, 1200, 3000, 8000];
-        let betIndex = 4; // Default to 100 (Index 4)
+        let betIndex = 4; // Default to 100
         
         let balance = 5000;
         let active = false;
@@ -262,11 +275,9 @@
 
         // 1. UPDATE BET DISPLAY
         function changeBet(direction) {
-            if(active) return; // Game chal rahi ho to bet change na ho
+            if(active) return; 
             
             betIndex += direction;
-            
-            // Limit check (Bounds)
             if(betIndex < 0) betIndex = 0;
             if(betIndex >= betValues.length) betIndex = betValues.length - 1;
 
@@ -296,7 +307,7 @@
             revealed = 0;
             multiplier = 1.0;
             
-            // Mines Generation
+            // Generate Mines
             mines = [];
             while(mines.length < minesCount) {
                 let r = Math.floor(Math.random() * 25);
@@ -307,10 +318,10 @@
             createGrid();
             msgBox.classList.remove('show');
             
-            // Button Change to CASHOUT
+            // Button Visuals
             actionBtn.classList.add('btn-cashout');
             btnMainText.innerText = "CASHOUT";
-            updateProfitUI(); // Show initial potential
+            updateProfitUI(); 
         }
 
         // 4. GRID LOGIC
@@ -344,12 +355,9 @@
                 tile.classList.add('gem');
                 if(getComputedStyle(icon).backgroundImage === 'none') icon.innerHTML = '💎';
                 revealed++;
-                
-                // Multiplier Logic
-                multiplier *= 1.15; // Simplified math
+                multiplier *= 1.15; 
                 updateProfitUI();
 
-                // Auto Win
                 if(revealed === (totalTiles - mines.length)) cashout();
             }
         }
@@ -393,12 +401,19 @@
             document.getElementById('msgTitle').style.color = win ? '#00ffcc' : '#ff0044';
             document.getElementById('msgText').innerText = win ? `+${amount}` : "Try Again";
 
-            updateProfitUI(); // Reset Button
+            updateProfitUI(); 
         }
 
         function updateBalance() {
             balanceEl.innerText = balance.toLocaleString();
         }
+
+        // Check if images are loading, if not apply fallback class
+        const imgCheck = new Image();
+        imgCheck.src = 'assets/btn_action.png';
+        imgCheck.onerror = function() {
+            document.getElementById('actionBtn').classList.add('no-img');
+        };
 
         createGrid();
     </script>
