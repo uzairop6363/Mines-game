@@ -5,26 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cyber Mines Elite</title>
     <style>
-        /* --- 1. ALIVE ANIMATIONS (Nayi Jaan) --- */
+        /* --- 1. ANIMATIONS (Zinda Effects) --- */
         
-        /* Background ka hilna (Drift) */
+        /* Background Slow Motion */
         @keyframes bg-drift {
             0% { background-position: center top; transform: scale(1); }
             50% { background-position: center bottom; transform: scale(1.05); }
             100% { background-position: center top; transform: scale(1); }
         }
 
-        /* Dabbo ka Saans Lena (Breathing Tiles) */
-        @keyframes tile-breath {
-            0% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
-            50% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); border-color: rgba(0, 255, 204, 0.5); }
-            100% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
+        /* Float (Hawa mein tairna) */
+        @keyframes float-gentle {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0px); }
         }
 
-        /* Hacker Scanline (TV Effect) */
-        @keyframes scanline {
-            0% { top: -100%; }
-            100% { top: 200%; }
+        /* Shine (Sheeshe ki chamak) */
+        @keyframes glass-shine {
+            0% { left: -100%; opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { left: 200%; opacity: 0; }
+        }
+
+        /* Neon Pulse */
+        @keyframes neon-pulse {
+            0% { filter: drop-shadow(0 0 2px #00ffcc); }
+            50% { filter: drop-shadow(0 0 8px #00ffcc); }
+            100% { filter: drop-shadow(0 0 2px #00ffcc); }
         }
 
         /* --- 2. CORE SETTINGS --- */
@@ -46,33 +54,42 @@
             display: flex; flex-direction: column; justify-content: space-between;
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
             overflow: hidden;
-
-            /* Background Zinda ho gaya */
             animation: bg-drift 20s infinite ease-in-out;
         }
 
-        /* Scanline Overlay (Cyber Feel) */
+        /* Scanline Overlay */
         .game-wrapper::after {
-            content: "";
-            position: absolute; left: 0; right: 0; height: 20%;
-            background: linear-gradient(to bottom, transparent, rgba(0, 255, 204, 0.1), transparent);
-            pointer-events: none;
-            animation: scanline 5s linear infinite;
-            z-index: 5;
+            content: ""; position: absolute; left: 0; right: 0; height: 10%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 255, 204, 0.05), transparent);
+            pointer-events: none; animation: scanline 6s linear infinite; z-index: 5;
         }
+        @keyframes scanline { 0% { top: -20%; } 100% { top: 120%; } }
 
-        /* --- HEADER --- */
+        /* --- HEADER (New Balance) --- */
         .header {
             padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent);
+            background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent);
             z-index: 10;
         }
         .logo { font-weight: 900; font-size: 22px; color: #fff; text-shadow: 0 0 10px #00ffcc; font-style: italic; }
-        .balance-box {
-            background: rgba(0, 20, 20, 0.9); border: 1px solid #00ffcc; color: #00ffcc;
-            padding: 6px 15px; border-radius: 20px; font-weight: bold; font-family: monospace;
-            box-shadow: 0 0 10px rgba(0,255,204,0.2);
+        
+        /* New Balance Panel */
+        .balance-panel {
+            width: 140px; height: 45px;
+            background: url('assets/ui_balance_panel.png') no-repeat center/contain;
+            /* Fallback */
+            background-color: rgba(0, 20, 20, 0.8); border: 1px solid #00ffcc; border-radius: 8px;
+            
+            display: flex; justify-content: center; align-items: center;
+            padding-left: 10px; /* Thoda right shift text ke liye */
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            animation: float-gentle 4s infinite ease-in-out;
+        }
+        
+        .balance-text {
+            font-family: monospace; font-size: 16px; font-weight: bold; color: #00ffcc;
+            text-shadow: 0 0 5px #00ffcc;
         }
 
         /* --- GRID AREA --- */
@@ -101,26 +118,15 @@
             backface-visibility: hidden; border-radius: 8px;
             display: flex; justify-content: center; align-items: center;
         }
-
         .front {
             background-color: #1a1a1a;
             background-image: url('assets/tile_closed.png'); background-size: 100% 100%;
             border: 1px solid rgba(255,255,255,0.1);
-            
-            /* Tiles ab saans lenge */
-            animation: tile-breath 3s infinite ease-in-out;
         }
-        
-        /* Random delay taake sab ek sath na hilein */
-        .tile:nth-child(even) .front { animation-delay: 1s; }
-        .tile:nth-child(odd) .front { animation-delay: 0.5s; }
-
         .back {
             transform: rotateY(180deg); background-color: #081015;
             box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
         }
-
-        /* Icons */
         .back-icon {
             width: 80%; height: 80%;
             background-size: contain; background-repeat: no-repeat; background-position: center;
@@ -128,29 +134,35 @@
         .tile.gem .back-icon { background-image: url('assets/tile_diamond.png'); filter: drop-shadow(0 0 8px #00ffcc); }
         .tile.bomb .back-icon { background-image: url('assets/tile_bomb.png'); filter: drop-shadow(0 0 8px #ff0044); }
 
-        /* --- NEW CONTROLS PANEL (Image Background) --- */
+        /* --- CONTROLS PANEL --- */
         .controls-panel {
-            /* Black color hata kar Image laga di */
             background: url('assets/ui_controls_bg.png') no-repeat center bottom;
             background-size: cover;
-            
-            /* Fallback agar image na ho */
+            /* Fallback */
             background-color: #050510;
-            
-            padding: 20px 20px 30px 20px; /* Bottom padding thodi zyada taake mobile mein kate nahi */
-            border-top: 1px solid #00ffcc;
+            padding: 20px 20px 30px 20px;
             display: flex; flex-direction: column; gap: 15px;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
-            z-index: 20;
-            position: relative;
+            z-index: 20; position: relative;
         }
 
-        /* Row 1: Bet & Mines */
-        .control-row {
-            display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
+        .control-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+
+        /* Stepper & Selectors (Floating & Shining) */
+        .stepper-container, .mines-selector {
+            position: relative; overflow: hidden; /* Shine ke liye */
+            animation: float-gentle 3s infinite ease-in-out;
+        }
+        
+        /* Shine Overlay */
+        .stepper-container::after, .mines-selector::after, .main-btn::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            animation: glass-shine 3s infinite;
+            pointer-events: none;
         }
 
-        /* 1. BET STEPPER */
         .stepper-container {
             display: flex; align-items: center; justify-content: space-between;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
@@ -164,17 +176,16 @@
             background-color: transparent; 
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             font-size: 24px; color: #00ffcc; user-select: none;
+            transition: transform 0.1s;
         }
         .stepper-btn:active { transform: scale(0.8); }
-        .stepper-btn.left { transform: rotate(180deg); } 
+        .stepper-btn.left { transform: rotate(180deg); }
 
         .stepper-display {
-            flex-grow: 1; text-align: center;
-            font-size: 22px; font-weight: 900; color: white;
+            flex-grow: 1; text-align: center; font-size: 22px; font-weight: 900; color: white;
             text-shadow: 0 0 10px #00ffcc; font-family: monospace;
         }
 
-        /* 2. MINES SELECTOR */
         .mines-selector {
             height: 50px; width: 80px;
             background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
@@ -187,10 +198,9 @@
             font-family: monospace;
         }
         .mines-select option { background: #000; }
-        
         .label-text { font-size: 12px; color: #fff; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; text-shadow: 0 0 5px black;}
 
-        /* 3. MAIN ACTION BUTTON */
+        /* MAIN BUTTON (Glowing & Shining) */
         .main-btn {
             width: 100%; height: 70px;
             background-image: url('assets/btn_action.png');
@@ -199,17 +209,20 @@
             border: none; outline: none; box-shadow: none; cursor: pointer;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: transform 0.1s;
+            position: relative; overflow: hidden;
+            
+            /* Dhadkan */
+            animation: neon-pulse 2s infinite ease-in-out;
         }
         .main-btn:active { transform: scale(0.95); }
         
-        .btn-text-main { font-size: 26px; font-weight: 900; color: #000; text-transform: uppercase; line-height: 1; }
-        .btn-text-sub { font-size: 12px; font-weight: bold; color: #222; margin-top: 2px; }
+        .btn-text-main { font-size: 26px; font-weight: 900; color: #000; text-transform: uppercase; line-height: 1; z-index: 2; }
+        .btn-text-sub { font-size: 12px; font-weight: bold; color: #222; margin-top: 2px; z-index: 2; }
 
         .main-btn.no-img {
             background: linear-gradient(180deg, #00ffcc, #00997a);
             border-radius: 10px; box-shadow: 0 0 20px rgba(0,255,204,0.4);
         }
-
         .btn-cashout { filter: hue-rotate(-40deg) brightness(1.2); }
 
         /* --- OVERLAYS --- */
@@ -235,7 +248,10 @@
 
         <div class="header">
             <div class="logo">CYBER MINES</div>
-            <div class="balance-box">PKR <span id="balance">5,000</span></div>
+            
+            <div class="balance-panel">
+                <span class="balance-text">PKR <span id="balance">5,000</span></span>
+            </div>
         </div>
 
         <div class="grid-container">
@@ -281,7 +297,7 @@
     </div>
 
     <script>
-        // --- JAVASCRIPT LOGIC (Same as before) ---
+        // --- JAVASCRIPT LOGIC (Unchanged) ---
         const betValues = [20, 40, 60, 80, 100, 200, 500, 800, 1200, 3000, 8000];
         let betIndex = 4;
         let balance = 5000;
