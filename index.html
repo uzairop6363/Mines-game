@@ -1,474 +1,212 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Mines Pro</title>
-    <style>
-        /* --- 1. CORE STYLING (Cyberpunk Theme) --- */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #020205; 
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<style>
+    /* --- ANIMATION DEFINITIONS --- */
 
-        .game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 480px;
-            background-image: url('assets/bg_mines.jpg'); 
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
-        }
+    /* 1. Screen Shake (Bomb phatne par) */
+    @keyframes shake-hard {
+        0% { transform: translate(0px, 0px) rotate(0deg); }
+        10% { transform: translate(-5px, -5px) rotate(-1deg); filter: hue-rotate(-20deg); }
+        20% { transform: translate(5px, 5px) rotate(1deg); }
+        30% { transform: translate(-5px, 5px) rotate(0deg); }
+        40% { transform: translate(5px, -5px) rotate(1deg); filter: hue-rotate(20deg); }
+        50% { transform: translate(-2px, 2px) rotate(-1deg); }
+        100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
 
-        /* --- HEADER --- */
-        .header {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 255, 204, 0.3);
-            z-index: 10;
-        }
+    /* 2. Background Breathing (Zinda maahol) */
+    @keyframes bg-breathe {
+        0% { background-size: 100% 100%; filter: brightness(1); }
+        50% { background-size: 105% 105%; filter: brightness(1.1); }
+        100% { background-size: 100% 100%; filter: brightness(1); }
+    }
 
-        .logo { font-weight: 900; font-size: 20px; color: #fff; letter-spacing: 1px; text-shadow: 0 0 10px #00ffcc; }
-        
-        .balance-box {
-            background: rgba(0, 20, 20, 0.8);
-            border: 1px solid #00ffcc; 
-            color: #00ffcc;
-            padding: 6px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-family: monospace;
-            font-size: 16px;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
-        }
+    /* 3. Neon Pulse (Band dabbo ke liye) */
+    @keyframes neon-pulse {
+        0% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.1); border-color: #333; }
+        50% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); border-color: #00ffcc; }
+        100% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.1); border-color: #333; }
+    }
 
-        /* --- GAME GRID AREA --- */
-        .grid-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-        }
+    /* 4. Gem Shine (Heere ki chamak) */
+    @keyframes gem-shine {
+        0% { filter: drop-shadow(0 0 5px #00ffcc) brightness(1); transform: scale(1); }
+        50% { filter: drop-shadow(0 0 20px #00ffcc) brightness(1.3); transform: scale(1.05); }
+        100% { filter: drop-shadow(0 0 5px #00ffcc) brightness(1); transform: scale(1); }
+    }
 
-        /* Multiplier Badge (Upar dikhega next profit) */
-        .next-profit-badge {
-            background: rgba(0,0,0,0.6);
-            padding: 8px 16px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #bbb;
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.3s;
-        }
-        .next-profit-badge span { color: #00ffcc; font-weight: bold; font-size: 16px; }
+    /* --- CORE STYLING --- */
+    body {
+        margin: 0; padding: 0;
+        background-color: #020205; 
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh; width: 100vw;
+        overflow: hidden;
+        display: flex; justify-content: center; align-items: center;
+    }
 
-        .mines-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 360px;
-        }
+    .game-wrapper {
+        position: relative;
+        width: 100%; height: 100%; max-width: 480px;
+        background-image: url('assets/bg_mines.jpg'); 
+        background-position: center;
+        display: flex; flex-direction: column; justify-content: space-between;
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
+        overflow: hidden; /* Shake effect bahar na jaye */
 
-        /* --- TILE STYLING & ANIMATION --- */
-        .tile {
-            aspect-ratio: 1/1;
-            background-color: #1a1a1a; 
-            border-radius: 6px;
-            cursor: pointer;
-            position: relative;
-            transform-style: preserve-3d; /* Flip effect ke liye */
-            transition: transform 0.3s, filter 0.1s;
-            
-            /* Default Image (Closed) */
-            background-image: url('assets/tile_closed.png');
-            background-size: 100% 100%;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.5); /* 3D depth */
-        }
+        /* Background Animation Active */
+        animation: bg-breathe 15s infinite ease-in-out;
+    }
 
-        .tile:active { transform: translateY(2px); box-shadow: 0 2px 0px rgba(0,0,0,0.5); }
+    /* JS se ye class add hogi jab bomb phatega */
+    .game-wrapper.shaking {
+        animation: shake-hard 0.5s ease-in-out;
+        border: 2px solid red; /* Laal jhatka */
+    }
 
-        /* Revealed State (Flip hokar Image change hogi) */
-        .tile.revealed {
-            transform: rotateY(180deg); /* Flip */
-            background-color: #081015;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-            cursor: default;
-        }
-        
-        /* Reveal hone ke baad andar ka content seedha dikhe */
-        .tile.revealed::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border-radius: 6px;
-            backface-visibility: hidden; /* Peeche se gayab */
-            transform: rotateY(180deg); /* Image ko wapis seedha karna */
-            background-size: 80%;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
+    /* --- HEADER --- */
+    .header {
+        padding: 15px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 255, 204, 0.3);
+        z-index: 10;
+    }
+    .logo { font-weight: 900; font-size: 20px; color: #fff; letter-spacing: 1px; text-shadow: 0 0 10px #00ffcc; }
+    .balance-box {
+        background: rgba(0, 20, 20, 0.8);
+        border: 1px solid #00ffcc; color: #00ffcc;
+        padding: 6px 15px; border-radius: 4px;
+        font-weight: bold; font-family: monospace; font-size: 16px;
+        box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+    }
 
-        /* Gem Style */
-        .tile.gem { border: 1px solid #00ffcc; }
-        .tile.gem::after { 
-            background-image: url('assets/tile_diamond.png'); 
-            filter: drop-shadow(0 0 8px #00ffcc);
-        }
+    /* --- GRID AREA --- */
+    .grid-container {
+        flex-grow: 1;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        padding: 20px; position: relative;
+    }
+    .next-profit-badge {
+        background: rgba(0,0,0,0.8); border: 1px solid #00ffcc;
+        padding: 8px 16px; border-radius: 20px; margin-bottom: 15px;
+        font-size: 14px; color: #bbb; opacity: 0; transition: opacity 0.3s;
+        box-shadow: 0 0 15px rgba(0,255,204,0.2); /* Badge glow */
+    }
+    .next-profit-badge span { color: #00ffcc; font-weight: bold; font-size: 16px; }
 
-        /* Bomb Style */
-        .tile.bomb { border: 1px solid #ff0044; }
-        .tile.bomb::after { 
-            background-image: url('assets/tile_bomb.png'); 
-            filter: drop-shadow(0 0 8px #ff0044);
-        }
+    .mines-grid {
+        display: grid; grid-template-columns: repeat(5, 1fr);
+        gap: 8px; width: 100%; max-width: 360px;
+        perspective: 1000px; /* 3D effect ke liye zaroori */
+    }
 
-        /* Faded Style (Game Over par baaki tiles) */
-        .tile.faded { opacity: 0.3; }
+    /* --- TILE ANIMATIONS (The Real Magic) --- */
+    .tile {
+        aspect-ratio: 1/1;
+        background-color: #1a1a1a; 
+        border-radius: 6px; cursor: pointer; position: relative;
+        transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.1s;
+        background-image: url('assets/tile_closed.png');
+        background-size: 100% 100%;
+        box-shadow: 0 4px 0px rgba(0,0,0,0.5);
+        border: 1px solid #333;
 
-        /* --- CONTROLS PANEL --- */
-        .controls-panel {
-            background: rgba(15, 20, 25, 0.95);
-            padding: 20px;
-            border-top: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 20;
-        }
+        /* Band dabbe ki dhadkan */
+        animation: neon-pulse 3s infinite ease-in-out;
+    }
 
-        .bet-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-        }
+    /* Hover Effect (Ungli rakhne par uchlega) */
+    .tile:hover:not(.revealed) {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 10px 20px rgba(0, 255, 204, 0.3);
+        border-color: #00ffcc;
+        z-index: 2;
+    }
+    .tile:active:not(.revealed) { transform: translateY(2px) scale(0.98); }
 
-        .input-group {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* Modern Inputs */
-        input, select {
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 16px;
-            outline: none;
-            text-align: center;
-        }
-        input:focus, select:focus { border-color: #00ffcc; }
+    /* Revealed State */
+    .tile.revealed {
+        transform: rotateY(180deg);
+        background-color: #081015;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
+        cursor: default;
+        animation: none; /* Kholne ke baad pulse band */
+        border: none;
+    }
+    
+    .tile.revealed::after {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        border-radius: 6px; backface-visibility: hidden;
+        transform: rotateY(180deg);
+        background-size: 85%; background-position: center; background-repeat: no-repeat;
+    }
 
-        /* BIG ACTION BUTTON */
-        .action-btn {
-            background: #00ffcc;
-            border: none;
-            color: #000;
-            padding: 16px;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            transition: transform 0.1s, box-shadow 0.2s;
-        }
-        .action-btn:active { transform: scale(0.98); }
+    /* Gem Style & Animation */
+    .tile.gem { 
+        box-shadow: 0 0 20px #00ffcc; /* Green Flash */
+    }
+    .tile.gem::after { 
+        background-image: url('assets/tile_diamond.png'); 
+        /* Heera chamkega */
+        animation: gem-shine 2s infinite ease-in-out;
+    }
 
-        /* Cashout State */
-        .cashout-btn {
-            background: #ffcc00;
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1.2;
-        }
-        .cashout-subtext { font-size: 12px; font-weight: normal; opacity: 0.8; }
+    /* Bomb Style */
+    .tile.bomb { 
+        box-shadow: 0 0 30px #ff0044; /* Red Flash */
+        background-color: #2a0000;
+    }
+    .tile.bomb::after { 
+        background-image: url('assets/tile_bomb.png'); 
+        filter: drop-shadow(0 0 15px #ff0044);
+        transform: scale(1.1); /* Bomb thoda bada dikhega */
+    }
 
-        /* --- NOTIFICATIONS / MESSAGES --- */
-        .message-overlay {
-            position: absolute;
-            top: 40%; left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(0,0,0,0.8);
-            padding: 15px 30px;
-            border-radius: 10px;
-            border: 2px solid;
-            text-align: center;
-            z-index: 100;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-        }
-        .message-overlay.show { transform: translate(-50%, -50%) scale(1); }
-        
-        .msg-win { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 30px rgba(0,255,204,0.3); }
-        .msg-lose { border-color: #ff0044; color: #ff0044; box-shadow: 0 0 30px rgba(255,0,68,0.3); }
-        
-        .msg-title { font-size: 24px; font-weight: 900; margin-bottom: 5px; }
-        .msg-amount { font-size: 18px; color: white; }
+    .tile.faded { opacity: 0.2; filter: grayscale(1); animation: none; }
 
-    </style>
-</head>
-<body>
+    /* --- CONTROLS --- */
+    .controls-panel {
+        background: rgba(15, 20, 25, 0.95); padding: 20px;
+        border-top: 1px solid #333; display: flex; flex-direction: column; gap: 12px; z-index: 20;
+    }
+    .bet-row { display: flex; justify-content: space-between; gap: 12px; }
+    .input-group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+    input, select {
+        background: #222; border: 1px solid #444; color: white; padding: 12px;
+        border-radius: 6px; font-weight: bold; font-size: 16px; outline: none; text-align: center;
+        transition: all 0.3s;
+    }
+    input:focus, select:focus { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0,255,204,0.2); }
 
-    <div class="game-wrapper">
-        
-        <div id="gameMsg" class="message-overlay">
-            <div class="msg-title" id="msgTitle">BOOM!</div>
-            <div class="msg-amount" id="msgAmount"></div>
-        </div>
+    .action-btn {
+        background: #00ffcc; border: none; color: #000; padding: 16px;
+        border-radius: 6px; font-size: 18px; font-weight: 900; text-transform: uppercase;
+        cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+        transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 255, 204, 0.6); }
+    .action-btn:active { transform: scale(0.98); }
 
-        <div class="header">
-            <div class="logo">MINES</div>
-            <div class="balance-box">PKR <span id="balanceDisplay">5,000</span></div>
-        </div>
+    .cashout-btn {
+        background: #ffcc00; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+        display: none; flex-direction: column; align-items: center; line-height: 1.2;
+    }
+    .cashout-btn:hover { box-shadow: 0 0 40px rgba(255, 204, 0, 0.7); }
+    .cashout-subtext { font-size: 12px; font-weight: normal; opacity: 0.8; }
 
-        <div class="grid-container">
-            <div id="profitBadge" class="next-profit-badge">Next: <span id="nextProfit">120</span></div>
-            <div class="mines-grid" id="grid">
-                </div>
-        </div>
-
-        <div class="controls-panel">
-            
-            <div class="bet-row">
-                <div class="input-group">
-                    <label>Bet Amount</label>
-                    <input type="number" value="100" id="betAmount" min="10">
-                </div>
-                <div class="input-group">
-                    <label>Mines</label>
-                    <select id="minesCount">
-                        <option value="1">1</option>
-                        <option value="3" selected>3</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                    </select>
-                </div>
-            </div>
-
-            <button class="action-btn" id="startBtn" onclick="startGame()">BET</button>
-            
-            <button class="action-btn cashout-btn" id="cashoutBtn" onclick="cashout()">
-                <span id="cashoutText">CASHOUT</span>
-                <span class="cashout-subtext" id="profitText">+0.00</span>
-            </button>
-
-        </div>
-
-    </div>
-
-    <script>
-        // --- GAME VARIABLES ---
-        let currentBalance = 5000;
-        let isGameActive = false;
-        let mineLocations = []; // Bombs kahan hain?
-        let revealedCount = 0;  // Kitne dabbe khole?
-        let currentBet = 0;
-        let totalMines = 3;
-        let currentMultiplier = 1.0;
-
-        const grid = document.getElementById('grid');
-        const startBtn = document.getElementById('startBtn');
-        const cashoutBtn = document.getElementById('cashoutBtn');
-        const cashoutText = document.getElementById('cashoutText');
-        const profitText = document.getElementById('profitText');
-        const msgBox = document.getElementById('gameMsg');
-        const profitBadge = document.getElementById('profitBadge');
-        const nextProfitSpan = document.getElementById('nextProfit');
-
-        // 1. GRID GENERATE KARNA (Start par)
-        function createGrid() {
-            grid.innerHTML = ''; // Safai
-            for(let i=0; i<25; i++) {
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                tile.dataset.index = i;
-                tile.onclick = () => handleTileClick(i, tile);
-                grid.appendChild(tile);
-            }
-        }
-
-        // 2. GAME START LOGIC
-        function startGame() {
-            const betInput = document.getElementById('betAmount').value;
-            currentBet = parseFloat(betInput);
-            totalMines = parseInt(document.getElementById('minesCount').value);
-
-            // Validation
-            if(currentBet > currentBalance) { alert("Low Balance!"); return; }
-            if(currentBet < 1) { alert("Invalid Bet!"); return; }
-
-            // Deduct Balance
-            updateBalance(-currentBet);
-            
-            // Reset State
-            isGameActive = true;
-            revealedCount = 0;
-            currentMultiplier = 1.0;
-            mineLocations = generateMines(totalMines); // Bombs chupao
-            
-            // UI Update
-            createGrid(); // Naya Grid
-            startBtn.style.display = 'none';
-            cashoutBtn.style.display = 'flex';
-            profitBadge.style.opacity = '1';
-            msgBox.classList.remove('show');
-            
-            // Pehle turn ka profit dikhana
-            updateNextProfitCalc();
-            updateCashoutBtn();
-        }
-
-        // 3. TILE CLICK HANDLER
-        function handleTileClick(index, tile) {
-            if(!isGameActive) return; // Game band hai to kuch na karo
-            if(tile.classList.contains('revealed')) return; // Pehle hi khula hai
-
-            // A. Agar BOMB hai (Game Over)
-            if(mineLocations.includes(index)) {
-                tile.classList.add('revealed', 'bomb');
-                gameOver(false); // Loss
-            } 
-            // B. Agar DIAMOND hai (Win)
-            else {
-                tile.classList.add('revealed', 'gem');
-                revealedCount++;
-                
-                // Multiplier badhana
-                calculateMultiplier();
-                updateCashoutBtn();
-                updateNextProfitCalc();
-
-                // Agar saare diamonds dhoond liye (Auto Win)
-                if(revealedCount === (25 - totalMines)) {
-                    cashout();
-                }
-            }
-        }
-
-        // 4. GENERATE RANDOM MINES
-        function generateMines(count) {
-            let mines = [];
-            while(mines.length < count) {
-                let r = Math.floor(Math.random() * 25);
-                if(!mines.includes(r)) mines.push(r);
-            }
-            return mines;
-        }
-
-        // 5. CALCULATE MATH (Simplified Casino Logic)
-        function calculateMultiplier() {
-            // Formula: Previous Multiplier * (Remaining Tiles / Safe Tiles Left)
-            // Example: 25 tiles, 3 mines. 
-            // Turn 1: 25 / 22 = 1.13x
-            let remainingTiles = 25 - revealedCount + 1; // +1 kyunki abhi click hua
-            let safeTilesLeft = 25 - totalMines - revealedCount + 1;
-            
-            // Thoda house edge (0.99) daal kar
-            let stepMulti = (remainingTiles / safeTilesLeft) * 0.99;
-            currentMultiplier *= stepMulti;
-        }
-
-        function updateNextProfitCalc() {
-            // Agla click kitna dega?
-            let remainingTiles = 25 - revealedCount;
-            let safeTilesLeft = 25 - totalMines - revealedCount;
-            let nextMulti = currentMultiplier * ((remainingTiles / safeTilesLeft) * 0.99);
-            let nextVal = Math.floor(currentBet * nextMulti);
-            nextProfitSpan.innerText = nextVal;
-        }
-
-        function updateCashoutBtn() {
-            let winAmount = Math.floor(currentBet * currentMultiplier);
-            let profit = winAmount - currentBet;
-            
-            cashoutText.innerText = `CASHOUT ${Math.floor(winAmount)}`;
-            profitText.innerText = `+${profit} (${currentMultiplier.toFixed(2)}x)`;
-        }
-
-        // 6. CASHOUT (Jeet kar nikalna)
-        function cashout() {
-            if(!isGameActive) return;
-            let winAmount = Math.floor(currentBet * currentMultiplier);
-            
-            updateBalance(winAmount);
-            gameOver(true, winAmount);
-        }
-
-        // 7. GAME OVER (Win or Lose)
-        function gameOver(isWin, amount) {
-            isGameActive = false;
-            
-            // Reveal All Mines
-            const tiles = document.querySelectorAll('.tile');
-            tiles.forEach((t, i) => {
-                if(mineLocations.includes(i)) {
-                    t.classList.add('revealed', 'bomb'); // Sab bombs dikhao
-                } else {
-                    t.classList.add('faded'); // Baaki dhundla kardo
-                }
-            });
-
-            // UI Reset
-            startBtn.style.display = 'block';
-            cashoutBtn.style.display = 'none';
-            profitBadge.style.opacity = '0';
-
-            // Message Dikhana
-            msgBox.className = 'message-overlay show';
-            if(isWin) {
-                msgBox.classList.add('msg-win');
-                msgBox.classList.remove('msg-lose');
-                document.getElementById('msgTitle').innerText = "YOU WON!";
-                document.getElementById('msgAmount').innerText = `+${amount}`;
-            } else {
-                msgBox.classList.add('msg-lose');
-                msgBox.classList.remove('msg-win');
-                document.getElementById('msgTitle').innerText = "BOOM!";
-                document.getElementById('msgAmount').innerText = "Try Again";
-            }
-        }
-
-        function updateBalance(amount) {
-            currentBalance += amount;
-            document.getElementById('balanceDisplay').innerText = currentBalance.toLocaleString();
-        }
-
-        // Load Grid first time
-        createGrid();
-
-    </script>
-</body>
-</html>
+    /* --- MESSAGES --- */
+    .message-overlay {
+        position: absolute; top: 40%; left: 50%;
+        transform: translate(-50%, -50%) scale(0); opacity: 0;
+        background: rgba(0,0,0,0.9); padding: 20px 40px;
+        border-radius: 15px; border: 3px solid; text-align: center; z-index: 100;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy effect */
+    }
+    .message-overlay.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    .msg-win { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 50px rgba(0,255,204,0.5); }
+    .msg-lose { border-color: #ff0044; color: #ff0044; box-shadow: 0 0 50px rgba(255,0,68,0.5); }
+    .msg-title { font-size: 28px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
+    .msg-amount { font-size: 22px; color: white; font-weight: bold; }
+</style>
