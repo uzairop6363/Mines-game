@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Mines - Pro</title>
+    <title>Cyber Mines - Final</title>
     <style>
         /* --- 1. CORE SETTINGS --- */
         body {
@@ -51,7 +50,6 @@
         .game-wrapper {
             position: relative; width: 100%; height: 100%;
             max-width: 500px;
-            /* BACKGROUND IMAGE FROM YOUR ASSETS */
             background-image: url('assets/bg_mines.jpg');
             background-size: cover; background-position: center;
             display: flex; flex-direction: column; align-items: center;
@@ -59,7 +57,6 @@
         }
         .game-wrapper.active { opacity: 1; }
 
-        /* BACK BUTTON */
         .back-btn {
             position: absolute; top: 20px; left: 20px; width: 45px; height: 45px;
             background-image: url('assets/btn_back.png');
@@ -67,7 +64,6 @@
             cursor: pointer; z-index: 50;
         }
 
-        /* HEADER / LOGO (Text for now, or use image if you have logo) */
         .header { margin-top: 30px; text-align: center; z-index: 10; }
         .game-title {
             font-size: 35px; font-weight: 900; color: #fff;
@@ -82,30 +78,24 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             padding: 15px;
-            /* Transparent background because tiles have their own images */
             z-index: 10;
         }
 
         .tile {
             width: 60px; height: 60px;
-            /* DEFAULT CLOSED TILE IMAGE */
             background-image: url('assets/tile_closed.png');
             background-size: 100% 100%;
             border-radius: 5px; cursor: pointer;
-            transition: transform 0.1s;
-            position: relative;
+            transition: transform 0.1s; position: relative;
         }
         .tile:active { transform: scale(0.95); }
-        
-        /* REVEALED STATES */
         .tile.diamond { background-image: url('assets/tile_diamond.png'); }
         .tile.bomb { background-image: url('assets/tile_bomb.png'); }
-        .tile.dim { filter: brightness(0.4); } /* For other mines when lost */
+        .tile.dim { filter: brightness(0.4); }
 
-        /* --- 4. CONTROLS PANEL (Bottom) --- */
+        /* --- 4. CONTROLS PANEL --- */
         .controls-panel {
-            margin-top: auto; width: 100%; height: 220px;
-            /* CONTROLS BACKGROUND IMAGE */
+            margin-top: auto; width: 100%; height: 240px; /* Thoda height barhaya */
             background-image: url('assets/ui_controls_bg.png');
             background-size: 100% 100%;
             display: flex; flex-direction: column; align-items: center;
@@ -113,14 +103,14 @@
             z-index: 20;
         }
 
-        /* Balance & Bet Row */
+        /* Balance & Bet Arrows Row */
         .top-row {
             display: flex; justify-content: space-between; width: 100%;
             margin-bottom: 15px; align-items: center;
         }
 
         .balance-box {
-            width: 140px; height: 45px;
+            width: 130px; height: 45px;
             background-image: url('assets/ui_balance_panel.png');
             background-size: 100% 100%;
             display: flex; justify-content: center; align-items: center;
@@ -128,27 +118,41 @@
             text-shadow: 0 1px 3px #000;
         }
 
-        .input-box {
-            width: 120px; height: 45px;
+        /* NEW BET CONTROL WITH ARROWS */
+        .bet-control {
+            display: flex; align-items: center; gap: 5px;
+        }
+        
+        .arrow-btn {
+            width: 35px; height: 35px;
+            background-image: url('assets/btn_arrow.png');
+            background-size: 100% 100%; background-color: transparent; border: none;
+            cursor: pointer;
+        }
+        .arrow-btn:active { transform: scale(0.9); }
+        .arrow-btn.left { transform: scaleX(-1); } /* Flip for left */
+
+        .bet-display {
+            width: 90px; height: 45px;
             background-image: url('assets/ui_input_bg.png');
-            background-size: 100% 100%; border: none;
-            text-align: center; color: #fff; font-size: 18px; font-weight: bold;
-            background-color: transparent; outline: none;
+            background-size: 100% 100%;
+            display: flex; justify-content: center; align-items: center;
+            color: #fff; font-size: 20px; font-weight: bold;
+            font-family: monospace;
         }
 
-        /* Mines Selector Buttons */
+        /* Mines Selector */
         .mines-select {
             display: flex; gap: 10px; margin-bottom: 15px;
         }
         .mine-btn {
-            width: 40px; height: 40px;
+            width: 45px; height: 45px;
             background: rgba(0,0,0,0.5); border: 1px solid cyan;
-            color: cyan; font-weight: bold; border-radius: 5px;
-            cursor: pointer;
+            color: cyan; font-weight: bold; border-radius: 5px; cursor: pointer;
+            font-size: 16px;
         }
         .mine-btn.active { background: cyan; color: #000; box-shadow: 0 0 10px cyan; }
 
-        /* Main Action Button */
         .action-btn {
             width: 200px; height: 60px;
             background-image: url('assets/btn_action.png');
@@ -159,7 +163,6 @@
         }
         .action-btn:active { transform: scale(0.95); }
 
-        /* Popup Message */
         .msg-overlay {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
             background: rgba(0,0,0,0.9); border: 2px solid cyan; border-radius: 10px;
@@ -201,7 +204,12 @@
                 <div class="balance-box">
                     <span id="balance">50000</span>
                 </div>
-                <input type="number" class="input-box" id="betAmount" value="100">
+                
+                <div class="bet-control">
+                    <button class="arrow-btn left" onclick="changeBet(-1)"></button>
+                    <div class="bet-display" id="betDisplay">100</div>
+                    <button class="arrow-btn right" onclick="changeBet(1)"></button>
+                </div>
             </div>
 
             <div class="mines-select">
@@ -244,6 +252,7 @@
             };
             simulateLoading();
             createGrid();
+            updateBetDisplay(); // Show initial bet
         };
 
         // --- GAME LOGIC ---
@@ -251,8 +260,26 @@
         let isPlaying = false;
         let mineCount = 1;
         let minesLocation = [];
-        let currentBet = 0;
         let currentMultiplier = 1.0;
+
+        // NEW: Bet Array Logic
+        const betValues = [10, 20, 50, 100, 400, 800, 1500, 3000];
+        let betIndex = 3; // Starts at 100 (Index 3)
+
+        function changeBet(dir) {
+            if(isPlaying) return; // Can't change bet during game
+            
+            betIndex += dir;
+            // Limits
+            if(betIndex < 0) betIndex = 0;
+            if(betIndex >= betValues.length) betIndex = betValues.length - 1;
+            
+            updateBetDisplay();
+        }
+
+        function updateBetDisplay() {
+            document.getElementById('betDisplay').innerText = betValues[betIndex];
+        }
 
         function createGrid() {
             const grid = document.getElementById('grid');
@@ -279,23 +306,19 @@
                 return;
             }
 
-            const betInput = document.getElementById('betAmount');
-            const bet = parseInt(betInput.value);
+            const currentBet = betValues[betIndex];
 
-            if(bet > balance) { alert("Insufficient Balance"); return; }
-            if(bet < 10) { alert("Min Bet 10"); return; }
+            if(currentBet > balance) { alert("Insufficient Balance"); return; }
 
-            balance -= bet;
-            currentBet = bet;
+            balance -= currentBet;
             updateUI();
 
             isPlaying = true;
             currentMultiplier = 1.0;
             minesLocation = generateMines();
             
-            // Reset Grid Images
             document.querySelectorAll('.tile').forEach(t => {
-                t.className = 'tile'; // Reset classes
+                t.className = 'tile';
             });
             document.getElementById('msgBox').style.transform = "translate(-50%, -50%) scale(0)";
 
@@ -315,19 +338,16 @@
         function clickTile(index) {
             if(!isPlaying) return;
             const tile = document.getElementById(`tile-${index}`);
-            
-            // Check if already opened (has class diamond or bomb)
             if(tile.classList.contains('diamond') || tile.classList.contains('bomb')) return;
 
             if(minesLocation.includes(index)) {
-                // GAME OVER
                 gameOver(index);
             } else {
-                // DIAMOND FOUND
-                tile.classList.add('diamond'); // This sets bg image to tile_diamond.png
+                tile.classList.add('diamond');
                 
-                // Increase Multiplier logic
+                // Multiplier Logic
                 currentMultiplier += (0.1 * mineCount);
+                let currentBet = betValues[betIndex];
                 let winVal = Math.floor(currentBet * currentMultiplier);
                 document.getElementById('mainBtn').innerText = "CLAIM " + winVal;
             }
@@ -335,6 +355,7 @@
 
         function cashOut() {
             if(!isPlaying) return;
+            let currentBet = betValues[betIndex];
             let winVal = Math.floor(currentBet * currentMultiplier);
             balance += winVal;
             updateUI();
@@ -344,15 +365,10 @@
         }
 
         function gameOver(hitIndex) {
-            // Reveal Hit Mine
             document.getElementById(`tile-${hitIndex}`).classList.add('bomb');
-
-            // Reveal All Mines
             minesLocation.forEach(idx => {
                 document.getElementById(`tile-${idx}`).classList.add('bomb');
             });
-
-            // Dim others
             document.querySelectorAll('.tile:not(.bomb):not(.diamond)').forEach(t => t.classList.add('dim'));
 
             showPopup("GAME OVER", "TRY AGAIN", "red");
