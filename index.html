@@ -3,438 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Mines Elite</title>
+    <title>Cyber Mines - Hacker Edition</title>
     <style>
-        /* --- 1. ANIMATIONS (Zinda Effects) --- */
-        @keyframes bg-drift {
-            0% { background-position: center top; transform: scale(1); }
-            50% { background-position: center bottom; transform: scale(1.05); }
-            100% { background-position: center top; transform: scale(1); }
-        }
-        @keyframes float-gentle {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-3px); }
-            100% { transform: translateY(0px); }
-        }
-        @keyframes glass-shine {
-            0% { left: -100%; opacity: 0; }
-            50% { opacity: 0.5; }
-            100% { left: 200%; opacity: 0; }
-        }
-        @keyframes neon-pulse {
-            0% { filter: drop-shadow(0 0 2px #00ffcc); }
-            50% { filter: drop-shadow(0 0 8px #00ffcc); }
-            100% { filter: drop-shadow(0 0 2px #00ffcc); }
-        }
-        @keyframes tile-breath {
-            0% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
-            50% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); border-color: rgba(0, 255, 204, 0.5); }
-            100% { box-shadow: 0 0 2px rgba(0, 255, 204, 0.1); border-color: rgba(255,255,255,0.1); }
-        }
-
-        /* --- 2. CORE SETTINGS --- */
+        /* --- 1. CORE & LOADING SCREEN --- */
         body {
             margin: 0; padding: 0;
-            background-color: #020205; 
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            font-family: 'Courier New', monospace; /* Hacker Font */
             height: 100vh; width: 100vw;
             overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; align-items: center;
+            user-select: none; -webkit-user-select: none;
         }
 
-        .game-wrapper {
-            position: relative;
-            width: 100%; height: 100%; max-width: 480px;
-            background-image: url('assets/bg_mines.jpg'); 
+        /* Loading Screen Overlay */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000;
+            background-image: url('assets/poster_mines.jpg'); /* YOUR POSTER */
             background-size: cover; background-position: center;
-            display: flex; flex-direction: column; justify-content: space-between;
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.15);
-            overflow: hidden;
-            animation: bg-drift 20s infinite ease-in-out;
+            z-index: 9999;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            padding-bottom: 80px;
+            transition: opacity 0.8s ease-out;
         }
 
-        .game-wrapper::after {
-            content: ""; position: absolute; left: 0; right: 0; height: 10%;
-            background: linear-gradient(to bottom, transparent, rgba(0, 255, 204, 0.05), transparent);
-            pointer-events: none; animation: scanline 6s linear infinite; z-index: 5;
+        .loading-text {
+            color: #0f0; /* Hacker Green */
+            font-size: 18px; font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0f0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        @keyframes scanline { 0% { top: -20%; } 100% { top: 120%; } }
 
-        /* --- HEADER (Updated with Back Button) --- */
+        /* Loading Bar Frame */
+        .progress-container {
+            width: 80%; max-width: 320px; height: 35px;
+            background-image: url('assets/frame_mines.png'); /* YOUR FRAME */
+            background-size: 100% 100%; background-repeat: no-repeat;
+            display: flex; align-items: center; padding: 0 6px;
+            box-sizing: border-box;
+            filter: drop-shadow(0 0 15px #00ff00);
+        }
+
+        /* Loading Fill (Cyber Blue/Green) */
+        .progress-fill {
+            height: 50%; width: 0%;
+            background: linear-gradient(90deg, #00ff00, #00ffff, #00ff00);
+            background-size: 200% 100%;
+            border-radius: 2px;
+            box-shadow: 0 0 10px #00ff00;
+            transition: width 0.2s ease-out;
+            animation: cyberFlow 1s linear infinite;
+        }
+        @keyframes cyberFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+        /* --- 2. GAME INTERFACE (Hidden Initially) --- */
+        .game-wrapper {
+            position: relative; width: 100%; height: 100%;
+            max-width: 500px;
+            background: radial-gradient(circle at center, #001a00 0%, #000 90%); /* Dark Hacker BG */
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0; transition: opacity 1s ease-in;
+        }
+        .game-wrapper.active { opacity: 1; }
+
+        /* Grid Background Effect (Matrix Lines) */
+        .game-wrapper::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px; pointer-events: none; z-index: 0;
+        }
+
+        /* Header */
         .header {
-            padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8), transparent);
+            margin-top: 30px; text-align: center; z-index: 10;
+            width: 100%;
+        }
+        .cyber-title {
+            font-size: 40px; font-weight: 900; color: #fff;
+            text-transform: uppercase; letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+        }
+
+        /* --- 3. MINES GRID --- */
+        .mines-container {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0, 20, 0, 0.6);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
             z-index: 10;
         }
 
-        /* Header Left Group (Back Btn + Logo) */
-        .header-left {
-            display: flex; align-items: center; gap: 15px;
-        }
-
-        .back-btn {
-            width: 35px; height: 35px;
-            cursor: pointer;
-            filter: drop-shadow(0 0 5px #00ffcc);
-            transition: transform 0.1s;
-        }
-        .back-btn:active { transform: scale(0.9); }
-        .back-btn img { width: 100%; height: 100%; object-fit: contain; }
-
-        .logo { font-weight: 900; font-size: 22px; color: #fff; text-shadow: 0 0 10px #00ffcc; font-style: italic; }
-        
-        .balance-panel {
-            width: 140px; height: 45px;
-            background: url('assets/ui_balance_panel.png') no-repeat center/contain;
-            background-color: rgba(0, 20, 20, 0.8); border: 1px solid #00ffcc; border-radius: 8px;
-            display: flex; justify-content: center; align-items: center;
-            padding-left: 10px;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-            animation: float-gentle 4s infinite ease-in-out;
-        }
-        .balance-text {
-            font-family: monospace; font-size: 16px; font-weight: bold; color: #00ffcc;
-            text-shadow: 0 0 5px #00ffcc;
-        }
-
-        /* --- GRID AREA --- */
-        .grid-container {
-            flex-grow: 1;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 10px; position: relative; z-index: 10;
-        }
-        .mines-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 8px; width: 100%; max-width: 340px;
-            perspective: 1000px;
-        }
-
-        /* --- TILE SYSTEM --- */
         .tile {
-            aspect-ratio: 1/1; position: relative; cursor: pointer;
-            transform-style: preserve-3d; transition: transform 0.3s;
-        }
-        .tile:active { transform: scale(0.90); }
-        .tile.revealed { transform: rotateY(180deg); cursor: default; }
-
-        .tile-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 8px;
+            width: 60px; height: 60px;
+            background: rgba(0, 50, 0, 0.5);
+            border: 1px solid #004400;
+            border-radius: 8px;
+            cursor: pointer;
             display: flex; justify-content: center; align-items: center;
+            transition: all 0.2s;
+            position: relative; overflow: hidden;
         }
-        .front {
-            background-color: #1a1a1a;
-            background-image: url('assets/tile_closed.png'); background-size: 100% 100%;
-            border: 1px solid rgba(255,255,255,0.1);
-            animation: tile-breath 3s infinite ease-in-out;
-        }
-        .tile:nth-child(even) .front { animation-delay: 1s; }
-        
-        .back {
-            transform: rotateY(180deg); background-color: #081015;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
-        }
-        .back-icon {
-            width: 80%; height: 80%;
+        .tile:active { transform: scale(0.95); }
+        .tile.revealed { background: #002200; border-color: #00ff00; }
+        .tile.lost { background: #330000; border-color: red; }
+
+        .tile-icon {
+            width: 70%; height: 70%;
             background-size: contain; background-repeat: no-repeat; background-position: center;
+            transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .tile.gem .back-icon { background-image: url('assets/tile_diamond.png'); filter: drop-shadow(0 0 8px #00ffcc); }
-        .tile.bomb .back-icon { background-image: url('assets/tile_bomb.png'); filter: drop-shadow(0 0 8px #ff0044); }
+        .tile.revealed .tile-icon { transform: scale(1); }
 
-        /* --- CONTROLS PANEL --- */
+        /* --- 4. CONTROLS --- */
         .controls-panel {
-            background: url('assets/ui_controls_bg.png') no-repeat center bottom;
-            background-size: cover;
-            background-color: #050510;
-            padding: 20px 20px 30px 20px;
+            margin-top: auto; margin-bottom: 20px;
+            width: 90%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            padding: 15px; border-radius: 15px;
             display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
-            z-index: 20; position: relative;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
         }
 
-        .control-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; color: #00ff00; font-size: 14px; }
+        .balance-display { font-size: 20px; font-weight: bold; text-shadow: 0 0 5px #00ff00; }
 
-        .stepper-container, .mines-selector {
-            position: relative; overflow: hidden;
-            animation: float-gentle 3s infinite ease-in-out;
-        }
-        .stepper-container::after, .mines-selector::after, .main-btn::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-20deg);
-            animation: glass-shine 3s infinite;
-            pointer-events: none;
+        .bet-controls { display: flex; gap: 10px; align-items: center; }
+        .input-box {
+            flex: 1; background: #001100; border: 1px solid #005500;
+            color: #fff; padding: 10px; text-align: center; font-family: monospace; font-size: 18px;
+            border-radius: 5px;
         }
 
-        .stepper-container {
-            display: flex; align-items: center; justify-content: space-between;
-            background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
-            background-color: rgba(0,0,0,0.6); border: 1px solid #00ffcc; border-radius: 8px;
-            padding: 0 5px; height: 50px; width: 100%;
+        .action-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(90deg, #004400, #008800);
+            border: 1px solid #00ff00; color: #fff;
+            font-family: monospace; font-size: 20px; font-weight: bold;
+            cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            transition: all 0.2s;
         }
+        .action-btn:active { transform: scale(0.98); }
+        .action-btn.cashout { background: linear-gradient(90deg, #b8860b, #ffd700); border-color: gold; color: #000; box-shadow: 0 0 15px gold; }
+        .action-btn:disabled { filter: grayscale(1); cursor: not-allowed; }
 
-        .stepper-btn {
-            width: 40px; height: 100%;
-            background: url('assets/btn_arrow.png') no-repeat center/contain;
-            background-color: transparent; 
-            cursor: pointer; display: flex; justify-content: center; align-items: center;
-            font-size: 24px; color: #00ffcc; user-select: none;
-            transition: transform 0.1s;
-        }
-        .stepper-btn:active { transform: scale(0.8); }
-        .stepper-btn.left { transform: rotate(180deg); }
-
-        .stepper-display {
-            flex-grow: 1; text-align: center; font-size: 22px; font-weight: 900; color: white;
-            text-shadow: 0 0 10px #00ffcc; font-family: monospace;
-        }
-
-        .mines-selector {
-            height: 50px; width: 80px;
-            background: url('assets/ui_input_bg.png') no-repeat center/100% 100%;
-            background-color: rgba(0,0,0,0.6); border: 1px solid #00ffcc; border-radius: 8px;
-            display: flex; justify-content: center; align-items: center;
-        }
+        /* Mine Selector */
         .mines-select {
-            background: transparent; border: none; color: white;
-            font-size: 20px; font-weight: bold; outline: none; text-align: center; width: 100%;
-            font-family: monospace;
+            display: flex; justify-content: space-between; margin-bottom: 10px;
         }
-        .mines-select option { background: #000; }
-        .label-text { font-size: 12px; color: #fff; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; text-shadow: 0 0 5px black;}
-
-        .main-btn {
-            width: 100%; height: 70px;
-            background-image: url('assets/btn_action.png');
-            background-position: center; background-size: contain; background-repeat: no-repeat;
-            background-color: transparent; 
-            border: none; outline: none; box-shadow: none; cursor: pointer;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: transform 0.1s;
-            position: relative; overflow: hidden;
-            animation: neon-pulse 2s infinite ease-in-out;
+        .mine-opt {
+            background: #002200; border: 1px solid #005500; color: #00aa00;
+            padding: 5px 10px; cursor: pointer; border-radius: 4px;
         }
-        .main-btn:active { transform: scale(0.95); }
-        
-        .btn-text-main { font-size: 26px; font-weight: 900; color: #000; text-transform: uppercase; line-height: 1; z-index: 2; }
-        .btn-text-sub { font-size: 12px; font-weight: bold; color: #222; margin-top: 2px; z-index: 2; }
-        .main-btn.no-img { background: linear-gradient(180deg, #00ffcc, #00997a); border-radius: 10px; }
-        .btn-cashout { filter: hue-rotate(-40deg) brightness(1.2); }
+        .mine-opt.active { background: #00ff00; color: #000; box-shadow: 0 0 10px #00ff00; }
 
-        /* --- OVERLAYS --- */
+        /* Message Overlay */
         .msg-overlay {
             position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 2px solid;
-            text-align: center; z-index: 100; transition: transform 0.3s;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); width: 80%;
+            background: rgba(0,0,0,0.9); border: 2px solid #00ff00;
+            padding: 20px 40px; text-align: center;
+            z-index: 50; pointer-events: none; transition: transform 0.3s;
         }
-        .msg-overlay.show { transform: translate(-50%, -50%) scale(1); }
-        .msg-title { font-size: 32px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
+        .msg-text { color: #fff; font-size: 24px; margin-bottom: 5px; }
+        .msg-sub { color: #00ff00; font-size: 30px; font-weight: bold; }
 
     </style>
 </head>
 <body>
 
-    <div class="game-wrapper" id="gameWrapper">
+    <div id="loader">
+        <div class="loading-text" id="loadStatus">INITIALIZING SYSTEM...</div>
+        <div class="progress-container">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div class="game-wrapper" id="gameScreen">
         
-        <div id="msgBox" class="msg-overlay">
-            <div class="msg-title" id="msgTitle"></div>
-            <div id="msgText" style="font-size: 20px; font-weight: bold; color:white;"></div>
-        </div>
-
         <div class="header">
-            <div class="header-left">
-                <div class="back-btn" onclick="alert('Going back to Lobby...')">
-                    <img src="assets/btn_back.png" alt="Back">
-                </div>
-                <div class="logo">CYBER MINES</div>
-            </div>
-            
-            <div class="balance-panel">
-                <span class="balance-text">Rs<span id="balance">5,000</span></span>
-            </div>
+            <div class="cyber-title">CYBER MINES</div>
         </div>
 
-        <div class="grid-container">
-            <div style="margin-bottom:10px; font-size:14px; background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px; border:1px solid #333;">
-                Next Profit: <span id="nextProfit" style="color:#00ffcc; font-weight:bold;">0</span>
+        <div class="mines-container" id="grid">
             </div>
-            <div class="mines-grid" id="grid"></div>
+
+        <div class="msg-overlay" id="msgBox">
+            <div class="msg-text" id="msgTitle">SYSTEM HACKED</div>
+            <div class="msg-sub" id="msgAmount">+500</div>
         </div>
 
         <div class="controls-panel">
-            
-            <div class="control-row">
-                <div style="flex: 3;">
-                    <div class="label-text">Bet Amount</div>
-                    <div class="stepper-container">
-                        <div class="stepper-btn left" onclick="changeBet(-1)">➜</div>
-                        <div class="stepper-display" id="betDisplay">100</div>
-                        <div class="stepper-btn" onclick="changeBet(1)">➜</div>
-                    </div>
-                </div>
-
-                <div style="flex: 1;">
-                    <div class="label-text">Mines</div>
-                    <div class="mines-selector">
-                        <select id="minesCount" class="mines-select">
-                            <option value="1">1</option>
-                            <option value="3" selected>3</option>
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                        </select>
-                    </div>
-                </div>
+            <div class="info-row">
+                <span>BALANCE</span>
+                <span class="balance-display">PKR <span id="balance">50000</span></span>
             </div>
 
-            <button class="main-btn" id="actionBtn" onclick="handleAction()">
-                <span class="btn-text-main" id="btnMainText">BET</span>
-                <span class="btn-text-sub" id="btnSubText">START GAME</span>
-            </button>
+            <div style="color:#00ff00; font-size:12px; margin-bottom:5px;">MINES DENSITY:</div>
+            <div class="mines-select">
+                <div class="mine-opt active" onclick="setMines(1)">1</div>
+                <div class="mine-opt" onclick="setMines(3)">3</div>
+                <div class="mine-opt" onclick="setMines(5)">5</div>
+                <div class="mine-opt" onclick="setMines(10)">10</div>
+                <div class="mine-opt" onclick="setMines(20)">20</div>
+            </div>
 
+            <div class="bet-controls">
+                <input type="number" class="input-box" id="betAmount" value="100">
+            </div>
+
+            <button class="action-btn" id="mainBtn" onclick="startGame()">START HACK</button>
         </div>
 
     </div>
 
     <script>
-        // --- JAVASCRIPT LOGIC (Unchanged) ---
-        const betValues = [20, 40, 60, 80, 100, 200, 500, 800, 1200, 3000, 8000];
-        let betIndex = 4;
-        let balance = 5000;
-        let active = false;
-        let mines = [];
-        let revealed = 0;
-        let multiplier = 1.0;
-        const totalTiles = 25;
+        // --- LOADING LOGIC ---
+        window.onload = function() {
+            const bar = document.getElementById('progressBar');
+            const loader = document.getElementById('loader');
+            const status = document.getElementById('loadStatus');
+            const game = document.getElementById('gameScreen');
+            let width = 0;
 
-        const grid = document.getElementById('grid');
-        const balanceEl = document.getElementById('balance');
-        const msgBox = document.getElementById('msgBox');
-        const betDisplay = document.getElementById('betDisplay');
-        const actionBtn = document.getElementById('actionBtn');
-        const btnMainText = document.getElementById('btnMainText');
-        const btnSubText = document.getElementById('btnSubText');
+            const simulateLoading = () => {
+                let jump = Math.floor(Math.random() * 15) + 1; 
+                if(Math.random() > 0.7) jump = 0; // Random pause
 
-        function changeBet(direction) {
-            if(active) return;
-            betIndex += direction;
-            if(betIndex < 0) betIndex = 0;
-            if(betIndex >= betValues.length) betIndex = betValues.length - 1;
-            betDisplay.innerText = betValues[betIndex];
-        }
+                width += jump;
+                if(width > 100) width = 100;
 
-        function handleAction() {
-            if(!active) startGame();
-            else cashout();
-        }
+                bar.style.width = width + '%';
 
-        function startGame() {
-            const currentBet = betValues[betIndex];
-            const minesCount = parseInt(document.getElementById('minesCount').value);
+                // Hacker Style Status Updates
+                if(width < 30) status.innerText = "BYPASSING FIREWALL...";
+                else if(width < 60) status.innerText = "INJECTING SCRIPTS...";
+                else if(width < 90) status.innerText = "DECRYPTING ASSETS...";
+                else status.innerText = "ACCESS GRANTED";
 
-            if(currentBet > balance) { alert("Insufficient Balance!"); return; }
+                if (width >= 100) {
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                            game.classList.add('active');
+                        }, 800);
+                    }, 500);
+                } else {
+                    setTimeout(simulateLoading, Math.random() * 150 + 50);
+                }
+            };
+            simulateLoading();
+            createGrid(); // Prepare Grid behind scenes
+        };
 
-            balance -= currentBet;
-            updateBalance();
-            active = true;
-            revealed = 0;
-            multiplier = 1.0;
-            
-            mines = [];
-            while(mines.length < minesCount) {
-                let r = Math.floor(Math.random() * 25);
-                if(!mines.includes(r)) mines.push(r);
-            }
+        // --- GAME LOGIC ---
+        let balance = 50000;
+        let isPlaying = false;
+        let mineCount = 1;
+        let minesLocation = [];
+        let tilesClicked = 0;
+        let currentBet = 0;
+        let currentMultiplier = 1.0;
 
-            createGrid();
-            msgBox.classList.remove('show');
-            actionBtn.classList.add('btn-cashout');
-            btnMainText.innerText = "CASHOUT";
-            updateProfitUI(); 
-        }
+        // Assets
+        const diamondImg = 'url("assets/icon_diamond.png")';
+        const bombImg = 'url("assets/icon_bomb.png")';
 
         function createGrid() {
+            const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            for(let i=0; i<totalTiles; i++) {
+            for(let i=0; i<25; i++) {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
-                tile.onclick = () => clickTile(i, tile);
-                tile.innerHTML = `
-                    <div class="tile-face front"></div>
-                    <div class="tile-face back"><div class="back-icon"></div></div>
-                `;
+                tile.id = `tile-${i}`;
+                tile.onclick = () => clickTile(i);
+                
+                const icon = document.createElement('div');
+                icon.className = 'tile-icon';
+                icon.id = `icon-${i}`;
+                
+                tile.appendChild(icon);
                 grid.appendChild(tile);
             }
         }
 
-        function clickTile(index, tile) {
-            if(!active || tile.classList.contains('revealed')) return;
+        function setMines(num) {
+            if(isPlaying) return;
+            mineCount = num;
+            document.querySelectorAll('.mine-opt').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function startGame() {
+            if(isPlaying) {
+                cashOut();
+                return;
+            }
+
+            const betInput = document.getElementById('betAmount');
+            const bet = parseInt(betInput.value);
+
+            if(bet > balance) { alert("INSUFFICIENT FUNDS"); return; }
+            if(bet < 10) { alert("MIN BET 10"); return; }
+
+            // Deduct Balance
+            balance -= bet;
+            currentBet = bet;
+            updateBalance();
+
+            // Reset Game State
+            isPlaying = true;
+            tilesClicked = 0;
+            currentMultiplier = 1.0;
+            minesLocation = generateMines();
+            
+            // Reset UI
+            document.querySelectorAll('.tile').forEach(t => {
+                t.className = 'tile';
+                t.querySelector('.tile-icon').style.backgroundImage = 'none';
+            });
+            document.getElementById('msgBox').style.transform = "translate(-50%, -50%) scale(0)";
+
+            // Change Button to Cashout
+            const btn = document.getElementById('mainBtn');
+            btn.innerText = "CASHOUT: " + bet;
+            btn.classList.add('cashout');
+        }
+
+        function generateMines() {
+            let locs = [];
+            while(locs.length < mineCount) {
+                let r = Math.floor(Math.random() * 25);
+                if(!locs.includes(r)) locs.push(r);
+            }
+            return locs;
+        }
+
+        function clickTile(index) {
+            if(!isPlaying) return;
+            const tile = document.getElementById(`tile-${index}`);
+            if(tile.classList.contains('revealed')) return;
 
             tile.classList.add('revealed');
-            const icon = tile.querySelector('.back-icon');
 
-            if(mines.includes(index)) {
-                tile.classList.add('bomb');
-                if(getComputedStyle(icon).backgroundImage === 'none') icon.innerHTML = '💣';
-                gameOver(false, 0);
+            if(minesLocation.includes(index)) {
+                // GAME OVER (BOMB)
+                gameOver(index);
             } else {
-                tile.classList.add('gem');
-                if(getComputedStyle(icon).backgroundImage === 'none') icon.innerHTML = '💎';
-                revealed++;
-                multiplier *= 1.15; 
-                updateProfitUI();
-                if(revealed === (totalTiles - mines.length)) cashout();
+                // DIAMOND FOUND
+                const icon = document.getElementById(`icon-${index}`);
+                icon.style.backgroundImage = diamondImg;
+                
+                tilesClicked++;
+                calculateMultiplier();
             }
         }
 
-        function updateProfitUI() {
-            const currentBet = betValues[betIndex];
-            const currentWin = Math.floor(currentBet * multiplier);
+        function calculateMultiplier() {
+            // Simple multiplier logic (Increases as you click more)
+            // Logic: 1.0 + (tiles * mines * 0.05) - Simplified
+            let growth = 0.1 * mineCount; 
+            currentMultiplier += growth; 
             
-            if(active) {
-                btnSubText.innerText = `Win: ${currentWin}`;
-                document.getElementById('nextProfit').innerText = Math.floor(currentWin * 1.15);
-            } else {
-                btnMainText.innerText = "BET";
-                btnSubText.innerText = "START GAME";
-                actionBtn.classList.remove('btn-cashout');
-            }
+            let winVal = Math.floor(currentBet * currentMultiplier);
+            document.getElementById('mainBtn').innerText = "CASHOUT: " + winVal;
         }
 
-        function cashout() {
-            const currentBet = betValues[betIndex];
-            const win = Math.floor(currentBet * multiplier);
-            balance += win;
+        function cashOut() {
+            if(!isPlaying) return;
+            
+            let winVal = Math.floor(currentBet * currentMultiplier);
+            balance += winVal;
             updateBalance();
-            gameOver(true, win);
+            
+            showMessage("HACK SUCCESS", "+" + winVal, "#00ff00");
+            endGame(true);
         }
 
-        function gameOver(win, amount) {
-            active = false;
-            mines.forEach(idx => {
-                const t = grid.children[idx];
-                t.classList.add('revealed', 'bomb');
+        function gameOver(hitIndex) {
+            // Show Hit Bomb
+            document.getElementById(`icon-${hitIndex}`).style.backgroundImage = bombImg;
+            document.getElementById(`tile-${hitIndex}`).classList.add('lost');
+
+            // Reveal All Mines
+            minesLocation.forEach(idx => {
+                document.getElementById(`tile-${idx}`).classList.add('revealed');
+                document.getElementById(`tile-${idx}`).classList.add('lost');
+                document.getElementById(`icon-${idx}`).style.backgroundImage = bombImg;
             });
-            msgBox.classList.add('show');
-            msgBox.style.borderColor = win ? '#00ffcc' : '#ff0044';
-            document.getElementById('msgTitle').innerText = win ? "YOU WON!" : "BOOM!";
-            document.getElementById('msgTitle').style.color = win ? '#00ffcc' : '#ff0044';
-            document.getElementById('msgText').innerText = win ? `+${amount}` : "Try Again";
-            updateProfitUI(); 
+
+            showMessage("SYSTEM FAILED", "LOST SIGNAL", "red");
+            endGame(false);
+        }
+
+        function endGame(won) {
+            isPlaying = false;
+            const btn = document.getElementById('mainBtn');
+            btn.innerText = "START HACK";
+            btn.classList.remove('cashout');
+        }
+
+        function showMessage(title, sub, color) {
+            const box = document.getElementById('msgBox');
+            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgAmount').innerText = sub;
+            document.getElementById('msgAmount').style.color = color;
+            box.style.transform = "translate(-50%, -50%) scale(1)";
+            
+            setTimeout(() => {
+                if(!isPlaying) box.style.transform = "translate(-50%, -50%) scale(0)";
+            }, 2000);
         }
 
         function updateBalance() {
-            balanceEl.innerText = balance.toLocaleString();
+            document.getElementById('balance').innerText = balance;
         }
 
-        const imgCheck = new Image();
-        imgCheck.src = 'assets/btn_action.png';
-        imgCheck.onerror = function() { document.getElementById('actionBtn').classList.add('no-img'); };
-
-        createGrid();
     </script>
 </body>
 </html>
